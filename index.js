@@ -71,13 +71,12 @@ module.exports = function () {
       task.log.push(log);
 
       return q.Promise(function(resolve, reject) {
-        task.save(function(err) {
-
+        task.save(function(err, savedTask) {
           if(err) {
             reject(err);
           }
           else {
-            resolve(true);
+            resolve(savedTask);
           }
         });
       });

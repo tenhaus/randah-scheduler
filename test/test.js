@@ -42,7 +42,7 @@ describe('randah-scheduler node module', function () {
 
   it('must add time', function () {
     return scheduler().addTime(task, 100, 50, Date.now())
-    .should.eventually.equal(true);
+    .should.eventually.have.property('log').and.length(1);
   });
 
   after(function() {
