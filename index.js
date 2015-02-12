@@ -18,69 +18,52 @@ var TaskModel = mongoose.model(
 
 module.exports = function () {
 
-  return {
+    return {
 
     createTask : function(name) {
-      var task = new TaskModel({name:name, enabled: true});
-
       return q.Promise(function(resolve, reject) {
-        task.save(function(err, savedTask) {
-          if(err) {
-            reject(err);
-          }
-          else {
-            resolve(savedTask);
-          }
-        });
+        new TaskModel({name:name, enabled: true})
+          .save(function(err, savedTask) {
+            if(err) reject(err);
+            else resolve(savedTask);
+          });
       });
     },
 
-    disableTask : function(task) {
-      return q.Promise(function(resolve, reject) {
-        task.enabled = false;
-        task.save(function(err, savedTask) {
-          if(err) {
-            reject(err);
-          }
-          else {
-            resolve(!savedTask.enabled);
-          }
-        });
-      });
-    },
-
-    enableTask : function(task) {
-      return q.Promise(function(resolve, reject) {
-        task.enabled = true;
-        task.save(function(err, savedTask) {
-          if(err) {
-            reject(err);
-          }
-          else {
-            resolve(savedTask.enabled);
-          }
-        });
-      });
-    },
 
     addTime : function(task, duration, worked, date) {
-      var log = {
-        duration:duration, worked:worked, date:date
-      };
-
-      task.log.push(log);
+      task.log.push(
+        {duration: duration, worked: worked, date: date}
+      );
 
       return q.Promise(function(resolve, reject) {
         task.save(function(err, savedTask) {
-          if(err) {
-            reject(err);
-          }
-          else {
-            resolve(savedTask);
-          }
+          if(err) reject(err);
+          else resolve(savedTask);
         });
       });
-    }
+    },
+
+
+    toggleTaskEnabled : function(task, isEnabled) {
+      task.enabled = isEnabled;
+      return q.Promise(function(resolve, reject) {
+        task.save(function(err, savedTask) {
+          if(err) reject(err);
+          else resolve(savedTask.enabled === isEnabled);
+        });
+      });
+    },
+
+
+    enableTask : function(task) {
+      return this.toggleTaskEnabled(task, true);
+    },
+
+
+    disableTask : function(task) {
+      return this.toggleTaskEnabled(task, false);
+    },
 
   };
 
