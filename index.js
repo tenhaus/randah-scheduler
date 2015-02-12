@@ -3,10 +3,13 @@
 var q = require('q');
 var mongoose = require('mongoose');
 
+// var skillLevelCap = 60;
+
 var TaskModel = mongoose.model(
   'Task',
   {
     name: String,
+    userId: String,
     enabled: Boolean,
     log: [{
       duration: Number,
@@ -20,9 +23,9 @@ module.exports = function () {
 
     return {
 
-    createTask : function(name) {
+    createTask : function(name, userId) {
       return q.Promise(function(resolve, reject) {
-        new TaskModel({name:name, enabled: true})
+        new TaskModel({name:name, userId: userId, enabled: true})
           .save(function(err, savedTask) {
             if(err) reject(err);
             else resolve(savedTask);
@@ -42,6 +45,11 @@ module.exports = function () {
           else resolve(savedTask);
         });
       });
+    },
+
+
+    getSkillLevel : function() {
+
     },
 
 

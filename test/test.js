@@ -1,11 +1,11 @@
 /*global describe, it, before, after */
 'use strict';
-// var assert = require('assert');
-var mongoose = require('mongoose');
-var scheduler = require('../');
 
+var mongoose = require('mongoose');
 var chai = require("chai");
 var chaiAsPromised = require("chai-as-promised");
+
+var scheduler = require('../');
 
 chai.use(chaiAsPromised);
 chai.should();
@@ -13,6 +13,7 @@ chai.should();
 describe('randah-scheduler node module', function () {
 
   var task = {};
+  var userId = '54dbdd9f863dba796188d72e';
 
   before(function() {
     mongoose.connect('mongodb://localhost/scheduler-test');
@@ -25,12 +26,17 @@ describe('randah-scheduler node module', function () {
 
 
   it('must create a task', function (done) {
-    scheduler().createTask('Test Task')
+    scheduler().createTask('Test Task', userId)
       .then(function(res, err) {
         if (err) throw err;
         task = res;
         done();
       });
+  });
+
+  it('must save user id', function () {
+    return task.should.have.property('userId')
+      .and.equal(userId);
   });
 
 
