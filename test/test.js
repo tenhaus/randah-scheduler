@@ -83,6 +83,10 @@ describe('randah-scheduler node module', function () {
   });
 
 
+  it('must get the total time logged', function() {
+    return scheduler().getTotalTime(task._id)
+    .should.eventually.equal(100);
+  });
 
 
   // it('must calculate level', function() {

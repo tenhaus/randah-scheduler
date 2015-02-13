@@ -52,7 +52,7 @@ module.exports = function () {
 
     saveTask : function(task) {
       return q.Promise(function(resolve, reject) {
-        task.save(function(err, savedTask) {          
+        task.save(function(err, savedTask) {
           if (err) reject(err);
           else resolve(savedTask);
         });
@@ -78,15 +78,27 @@ module.exports = function () {
     },
 
 
-    // getTotalTime : function(task) {
-    //
-    // },
+    getTotalTime : function(taskId) {
+      return this.getTask(taskId)
+      .then(function(task, err) {
+        if(err) throw err;
+
+        var totalTime = 0;
+        _.forEach(task.log, function(log) {
+          totalTime += log.duration;
+        });
+
+        return totalTime;
+      });
+    },
 
 
     getSkillLevelForUser : function(userId) {
       var self = this;
+
       return q.Promise(function(resolve, reject) {
         var query  = TaskModel.where({ userId: userId });
+
         query.findOne(function(err, task) {
           if (err) reject(err);
           else resolve(self.calculateSkillLevelForTask(task));
