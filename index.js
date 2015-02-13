@@ -46,19 +46,43 @@ module.exports = function () {
 
     return {
 
+
     createTask : function(name, userId) {
-      return q.Promise(function(resolve, reject) {
+      var deferred = q.defer();
+      var query  = TaskModel.where(
+        { name: name.trim(), userId: userId }
+      );
+
+      // Make sure there isn't already a task
+      // with this name
+      q.ninvoke(query, 'findOne')
+      .then(function(task) {
+        if(task) {
+          deferred.reject('There\'s already a task with this name');
+        }
+
+        return;
+      })
+
+      // If we didn't find a task then we're
+      // creating a new one
+      .then(function() {
         new TaskModel({
-            name:name,
+            name:name.trim(),
             userId: userId,
             level: 1,
             enabled: true
-          })
-          .save(function(err, savedTask) {
-            if (err) reject(err);
-            else resolve(savedTask);
-          });
+        })
+        .save(function(err, savedTask) {
+          if (err) deferred.reject(err);
+          else deferred.resolve(savedTask);
+        });
+      })
+      .fail(function(err) {
+        deferred.reject(new Error(err));
       });
+
+      return deferred.promise;
     },
 
 
@@ -103,6 +127,7 @@ module.exports = function () {
         var leveler = exp('Tasks', expOptions);
         leveler.inc(previousXp + xp);
 
+        // Update the level
         task.level = leveler.currentLevel();
 
         // Add the data to the log

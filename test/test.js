@@ -21,7 +21,7 @@ describe('randah-scheduler node module', function () {
 
 
   after(function() {
-    // task.remove();
+    task.remove();
   });
 
 
@@ -35,8 +35,16 @@ describe('randah-scheduler node module', function () {
   });
 
 
-  if('must save a task', function() {
-    scheduler().saveTask(task)
+  it('must reject a duplicate task', function(done) {
+    return scheduler().createTask('Test Task', userId)
+    .should.eventually.be.rejected.and.notify(function() {
+      done();
+    });
+  });
+
+
+  it('must save a task', function() {
+    return scheduler().saveTask(task)
     .should.eventually.have.property('_id')
     .and.deep.equal(task._id);
   });
@@ -77,15 +85,22 @@ describe('randah-scheduler node module', function () {
 
   it('must add time to the log', function () {
     return scheduler()
-      .addTime(task._id, 10000, 500, Date.now())
+      .addTime(task._id, 500, 500, Date.now())
       .should.eventually.have.property('log')
       .and.length(1);
   });
 
 
+  it('must level up', function() {
+    return scheduler().getTask(task._id)
+    .should.eventually.have.property('level')
+    .and.equal(2);
+  });
+
+
   it('must get the total time logged', function() {
     return scheduler().getTotalTime(task._id)
-    .should.eventually.equal(10000);
+    .should.eventually.equal(500);
   });
 
 
