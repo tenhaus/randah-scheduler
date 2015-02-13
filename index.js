@@ -141,11 +141,6 @@ module.exports = function () {
     },
 
 
-    levelUp: function(taskId, level) {
-      console.log('level up ' + level);
-    },
-
-
     getTotalTime : function(taskId) {
       return this.getTask(taskId)
       .then(function(task, err) {
@@ -159,24 +154,6 @@ module.exports = function () {
         return totalTime;
       });
     },
-
-
-    // getSkillLevelForTask : function(taskId) {
-    //   var self = this;
-    //
-    //   return q.Promise(function(resolve, reject) {
-    //     this.getTotalTime(taskId)
-    //     .then(function(time, err) {
-    //       if (err) reject(err);
-    //       else {
-    //         exp('test', expOptions).inc(time);
-    //       }
-    //     });
-    //   });
-    // },
-
-
-
 
 
     toggleTaskEnabled : function(taskId, isEnabled) {
