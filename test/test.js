@@ -34,30 +34,62 @@ describe('randah-scheduler node module', function () {
       });
   });
 
+
+  if('must save a task', function() {
+    scheduler().saveTask(task)
+    .should.eventually.have.property('_id')
+    .and.deep.equal(task._id);
+  });
+
+
+  it('must load a task by id', function() {
+    return scheduler().getTask(task._id)
+    .should.eventually.have.property('_id')
+    .and.deep.equal(task._id);
+  });
+
+
   it('must save user id', function () {
     return task.should.have.property('userId')
-      .and.equal(userId);
+      .and.deep.equal(userId);
   });
 
 
   it('must disable a task', function () {
-    return scheduler().disableTask(task)
-      .should.eventually.equal(true);
+    return scheduler().disableTask(task._id)
+    .should.eventually.have.property('enabled')
+    .and.deep.equal(false);
   });
 
 
   it('must enable a task', function () {
-    return scheduler().enableTask(task)
-      .should.eventually.equal(true);
+    return scheduler().enableTask(task._id)
+    .should.eventually.have.property('enabled')
+    .and.deep.equal(true);
+  });
+
+
+  it('must give level 1 for no logged time', function() {
+    return scheduler().getSkillLevelForUser(userId)
+      .should.eventually.equal(1);
   });
 
 
   it('must add time to the log', function () {
     return scheduler()
-      .addTime(task, 100, 50, Date.now())
+      .addTime(task._id, 100, 50, Date.now())
       .should.eventually.have.property('log')
       .and.length(1);
   });
+
+
+
+
+  // it('must calculate level', function() {
+  //   return scheduler().getSkillLevelForUser(userId)
+  //     .should.eventually.equal(100);
+  // });
+
 
 
 });
