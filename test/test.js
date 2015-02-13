@@ -21,17 +21,17 @@ describe('randah-scheduler node module', function () {
 
 
   after(function() {
-    task.remove();
+    // task.remove();
   });
 
 
   it('must create a task', function (done) {
     scheduler().createTask('Test Task', userId)
-      .then(function(res, err) {
-        if (err) throw err;
-        task = res;
-        done();
-      });
+    .then(function(res, err) {
+      if (err) throw err;
+      task = res;
+      done();
+    });
   });
 
 
@@ -69,15 +69,15 @@ describe('randah-scheduler node module', function () {
   });
 
 
-  it('must give level 1 for no logged time', function() {
-    return scheduler().getSkillLevelForUser(userId)
-      .should.eventually.equal(1);
-  });
+  // it('must give level 1 for no logged time', function() {
+  //   return scheduler().getSkillLevelForTask(task._id)
+  //     .should.eventually.equal(1);
+  // });
 
 
   it('must add time to the log', function () {
     return scheduler()
-      .addTime(task._id, 100, 50, Date.now())
+      .addTime(task._id, 10000, 500, Date.now())
       .should.eventually.have.property('log')
       .and.length(1);
   });
@@ -85,12 +85,23 @@ describe('randah-scheduler node module', function () {
 
   it('must get the total time logged', function() {
     return scheduler().getTotalTime(task._id)
-    .should.eventually.equal(100);
+    .should.eventually.equal(10000);
   });
 
 
+  it('must add time to the log again', function () {
+    return scheduler()
+      .addTime(task._id, 10000, 500, Date.now())
+      .should.eventually.have.property('log')
+      .and.length(2);
+  });
+
+
+
+
+
   // it('must calculate level', function() {
-  //   return scheduler().getSkillLevelForUser(userId)
+  //   return scheduler().getSkillLevelForTask(task._id)
   //     .should.eventually.equal(100);
   // });
 

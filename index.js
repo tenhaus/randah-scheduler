@@ -3,11 +3,15 @@
 var q = require('q');
 var mongoose = require('mongoose');
 var _ = require('lodash-node');
-var primality = require('primality');
-
+var exp = require('voxel-exp');
 
 var minLevel = 1;
-var skillTimeDivisor = 5;
+var maxLevel = 1000;
+
+var expOptions = {
+  minLevel:minLevel,
+  maxLevel:maxLevel
+};
 
 var TaskModel = mongoose.model(
   'Task',
@@ -15,22 +19,41 @@ var TaskModel = mongoose.model(
     name: String,
     userId: String,
     enabled: Boolean,
+    level: Number,
     log: [{
       duration: Number,
       worked: Number,
-      date: Date
+      date: Date,
+      xp: Number
     }]
   }
 );
+
+function xpForTime(duration, worked, currentLevel)
+{
+  var percentWorked = worked / duration;
+  var credited = duration * percentWorked;
+
+  if(currentLevel < 10) {
+    credited *= 0.10;
+  }
+
+  credited = 10000;
+  return credited;
+}
 
 module.exports = function () {
 
     return {
 
-
     createTask : function(name, userId) {
       return q.Promise(function(resolve, reject) {
-        new TaskModel({name:name, userId: userId, enabled: true})
+        new TaskModel({
+            name:name,
+            userId: userId,
+            level: 1,
+            enabled: true
+          })
           .save(function(err, savedTask) {
             if (err) reject(err);
             else resolve(savedTask);
@@ -67,14 +90,34 @@ module.exports = function () {
       .then(function(task, err) {
         if(err) throw err;
 
+        var previousXp = 0;
+
+        _.forEach(task.log, function(log) {
+          previousXp += log.xp;
+        });
+
+        // Calculate the xp
+        var xp = xpForTime(duration, worked, task.level);
+
+        // Level maybe
+        var leveler = exp('Tasks', expOptions);
+        leveler.inc(previousXp + xp);
+
+        task.level = leveler.currentLevel();
+
         // Add the data to the log
         task.log.push(
-          {duration: duration, worked: worked, date: date}
+          {duration: duration, worked: worked, date: date, xp: xp}
         );
 
         // Save the task
         return self.saveTask(task);
       });
+    },
+
+
+    levelUp: function(taskId, level) {
+      console.log('level up ' + level);
     },
 
 
@@ -93,42 +136,22 @@ module.exports = function () {
     },
 
 
-    getSkillLevelForUser : function(userId) {
-      var self = this;
-
-      return q.Promise(function(resolve, reject) {
-        var query  = TaskModel.where({ userId: userId });
-
-        query.findOne(function(err, task) {
-          if (err) reject(err);
-          else resolve(self.calculateSkillLevelForTask(task));
-        });
-      });
-    },
-
-
-    calculateSkillLevelForTask : function(task) {
-      if(task.log.length === 0) return minLevel;
-
-      var totalTime = 0;
-
-      _.forEach(task.log, function(log) {
-        totalTime += log.duration;
-      });
-
-      // Scale the time
-      var adjustedTime = Math.round(totalTime / skillTimeDivisor);
-
-      // Find the lowest cousin prime if adjusted
-      // isn't a prime
-      while(!primality(adjustedTime)) {
-        adjustedTime -= 1;
-      }
+    // getSkillLevelForTask : function(taskId) {
+    //   var self = this;
+    //
+    //   return q.Promise(function(resolve, reject) {
+    //     this.getTotalTime(taskId)
+    //     .then(function(time, err) {
+    //       if (err) reject(err);
+    //       else {
+    //         exp('test', expOptions).inc(time);
+    //       }
+    //     });
+    //   });
+    // },
 
 
 
-      return adjustedTime;
-    },
 
 
     toggleTaskEnabled : function(taskId, isEnabled) {
