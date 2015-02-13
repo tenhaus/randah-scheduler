@@ -35,11 +35,9 @@ describe('randah-scheduler node module', function () {
   });
 
 
-  it('must reject a duplicate task', function(done) {
+  it('must reject a duplicate task', function() {
     return scheduler().createTask('Test Task', userId)
-    .should.eventually.be.rejected.and.notify(function() {
-      done();
-    });
+    .should.eventually.be.rejected;
   });
 
 

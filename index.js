@@ -59,14 +59,17 @@ module.exports = function () {
       .then(function(task) {
         if(task) {
           deferred.reject('There\'s already a task with this name');
+          return true;
         }
 
-        return;
+        return false;
       })
 
       // If we didn't find a task then we're
       // creating a new one
-      .then(function() {
+      .then(function(wasRejected) {
+        if(wasRejected) return;
+
         new TaskModel({
             name:name.trim(),
             userId: userId,
@@ -122,6 +125,10 @@ module.exports = function () {
 
         // Calculate the xp
         var xp = xpForTime(duration, worked, task.level);
+
+        // Make sure we're starting with the
+        // task's existing level
+        expOptions.startLevel = task.level;
 
         // Level maybe
         var leveler = exp('Tasks', expOptions);
