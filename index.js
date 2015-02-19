@@ -3,7 +3,6 @@
 var q = require('q');
 var mongoose = require('mongoose');
 var _ = require('lodash-node');
-var exp = require('voxel-exp');
 
 var minLevel = 1;
 var maxLevel = 1000;

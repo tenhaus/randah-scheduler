@@ -20,6 +20,7 @@
     "lodash-node": "^3.1.0",
     "mongoose": "^3.8.23",
     "q": "^1.1.2",
+    "randah-leveler": "git://github.com/tenhaus/randah-leveler.git",
     "voxel-exp": "git+https://github.com/tenhaus/voxel-exp.git"
   },
   "devDependencies": {
