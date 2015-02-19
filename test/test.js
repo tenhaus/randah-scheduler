@@ -75,12 +75,6 @@ describe('randah-scheduler node module', function () {
   });
 
 
-  // it('must give level 1 for no logged time', function() {
-  //   return scheduler().getSkillLevelForTask(task._id)
-  //     .should.eventually.equal(1);
-  // });
-
-
   it('must add time to the log', function () {
     return scheduler()
       .addTime(task._id, 60, 60, Date.now())
@@ -110,14 +104,19 @@ describe('randah-scheduler node module', function () {
   });
 
 
+  it('must reset the time logged', function() {
+    return scheduler().resetTime(task._id)
+    .should.eventually.have.property('log')
+    .and.length(0);
+  });
 
 
-
-  // it('must calculate level', function() {
-  //   return scheduler().getSkillLevelForTask(task._id)
-  //     .should.eventually.equal(100);
-  // });
-
+  it('must be level 10,000 in 9999 hours', function() {
+    return scheduler()
+    .addTime(task._id, 9999*60, 9999*60, Date.now())
+    .should.eventually.have.property('level')
+    .and.equal(10000);
+  });
 
 
 });

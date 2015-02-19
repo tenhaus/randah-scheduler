@@ -119,6 +119,21 @@ module.exports = function () {
     },
 
 
+    resetTime: function(taskId) {
+      var self = this;
+      
+      return this.getTask(taskId)
+      .then(function(task, err) {
+        if(err) throw err;
+
+        // Reset the log
+        task.log = [];
+        return self.saveTask(task);
+      });
+
+    },
+
+
     getTotalTime : function(taskId) {
       return this.getTask(taskId)
       .then(function(task, err) {
