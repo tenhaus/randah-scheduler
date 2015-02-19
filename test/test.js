@@ -4,6 +4,8 @@
 var mongoose = require('mongoose');
 var chai = require("chai");
 var chaiAsPromised = require("chai-as-promised");
+var _ = require('lodash-node');
+var q = require('q');
 
 var scheduler = require('../');
 
@@ -15,13 +17,46 @@ describe('randah-scheduler node module', function () {
   var task = {};
   var userId = '54dbdd9f863dba796188d72e';
 
+  var tasks = [
+    {name: 'Drawing'},
+    {name: 'Candle Making'},
+    {name: 'Writing'},
+    {name: 'Cleaning'},
+    {name: 'Tarot'},
+    {name: 'Left Hand Writing'},
+    {name: 'Tenhaus.com'},
+    {name: 'Find an accountant'},
+    {name: 'Excercise'},
+    {name: 'Juggling'},
+    {name: 'Josh Site'},
+    {name: 'jojosouth.com'},
+    {name: 'Renew License'},
+    {name: 'CVI'},
+    {name: 'BNL'}
+  ];
+
   before(function() {
     mongoose.connect('mongodb://localhost/scheduler-test');
   });
 
 
-  after(function() {
-    task.remove();
+  after(function(done) {
+    var removePromises = [];
+    var schedule = scheduler();
+
+    removePromises.push(schedule.deleteTask(task._id));
+
+    _.forEach(tasks, function(task) {
+      removePromises.push(schedule.deleteTask(task._id));
+    });
+
+    q.all(removePromises)
+    .then(function() {
+      done();
+    })
+    .fail(function(err) {
+      done(err);
+    });
   });
 
 
@@ -116,6 +151,28 @@ describe('randah-scheduler node module', function () {
     .addTime(task._id, 9999*60, 9999*60, Date.now())
     .should.eventually.have.property('level')
     .and.equal(10000);
+  });
+
+  it('must schedule tasks for time', function(done) {
+    var schedule = scheduler();
+    var addPromises = [];
+
+    _.forEach(tasks, function(taskToAdd) {
+      addPromises.push(schedule.createTask(taskToAdd.name, userId));
+    });
+
+    q.all(addPromises)
+    .then(function(addResult) {
+      tasks = addResult;
+      return schedule.schedule(6*60);
+    })
+    .then(function(scheduleResult) {
+      scheduleResult.should.deep.equal([]);
+      done();
+    })
+    .fail(function(err) {
+      done(err);
+    });
   });
 
 

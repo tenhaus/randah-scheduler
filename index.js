@@ -36,7 +36,9 @@ module.exports = function () {
       q.ninvoke(query, 'findOne')
       .then(function(task) {
         if(task) {
-          deferred.reject('There\'s already a task with this name');
+          deferred.reject(
+            new Error('There\'s already a task with this name')
+          );
           return true;
         }
 
@@ -64,6 +66,29 @@ module.exports = function () {
       });
 
       return deferred.promise;
+    },
+
+
+    deleteTask : function(taskId) {
+      return this.getTask(taskId)
+      .then(function(task, err) {
+        if(err) throw err;        
+        return task.remove();
+      });
+    },
+
+
+    schedule : function(amountOfTime) {
+      return q.Promise(function(resolve, reject) {
+        if(amountOfTime <= 0 ||
+           amountOfTime === undefined) {
+             reject('Must provide an amount of time');
+        }
+        else {
+          console.log(amountOfTime);
+          resolve([]);
+        }
+      });
     },
 
 
@@ -121,7 +146,7 @@ module.exports = function () {
 
     resetTime: function(taskId) {
       var self = this;
-      
+
       return this.getTask(taskId)
       .then(function(task, err) {
         if(err) throw err;
