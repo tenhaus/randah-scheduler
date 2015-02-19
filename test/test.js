@@ -83,7 +83,7 @@ describe('randah-scheduler node module', function () {
 
   it('must add time to the log', function () {
     return scheduler()
-      .addTime(task._id, 500, 500, Date.now())
+      .addTime(task._id, 60, 60, Date.now())
       .should.eventually.have.property('log')
       .and.length(1);
   });
@@ -98,7 +98,7 @@ describe('randah-scheduler node module', function () {
 
   it('must get the total time logged', function() {
     return scheduler().getTotalTime(task._id)
-    .should.eventually.equal(500);
+    .should.eventually.equal(60);
   });
 
 

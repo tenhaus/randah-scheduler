@@ -3,14 +3,7 @@
 var q = require('q');
 var mongoose = require('mongoose');
 var _ = require('lodash-node');
-
-var minLevel = 1;
-var maxLevel = 1000;
-
-var expOptions = {
-  minLevel:minLevel,
-  maxLevel:maxLevel
-};
+var randahLeveler = require('randah-leveler');
 
 var TaskModel = mongoose.model(
   'Task',
@@ -22,24 +15,10 @@ var TaskModel = mongoose.model(
     log: [{
       duration: Number,
       worked: Number,
-      date: Date,
-      xp: Number
+      date: Date
     }]
   }
 );
-
-function xpForTime(duration, worked, currentLevel)
-{
-  var percentWorked = worked / duration;
-  var credited = duration * percentWorked;
-
-  if(currentLevel < 10) {
-    credited *= 0.10;
-  }
-
-  credited = 10000;
-  return credited;
-}
 
 module.exports = function () {
 
@@ -116,29 +95,22 @@ module.exports = function () {
       .then(function(task, err) {
         if(err) throw err;
 
-        var previousXp = 0;
+        var previousWorked = 0;
 
         _.forEach(task.log, function(log) {
-          previousXp += log.xp;
+          previousWorked += log.worked;
         });
 
-        // Calculate the xp
-        var xp = xpForTime(duration, worked, task.level);
-
-        // Make sure we're starting with the
-        // task's existing level
-        expOptions.startLevel = task.level;
-
         // Level maybe
-        var leveler = exp('Tasks', expOptions);
-        leveler.inc(previousXp + xp);
+        var leveler = randahLeveler();
+        leveler.increment(previousWorked + worked);
 
         // Update the level
-        task.level = leveler.currentLevel();
+        task.level = leveler.level();
 
         // Add the data to the log
         task.log.push(
-          {duration: duration, worked: worked, date: date, xp: xp}
+          {duration: duration, worked: worked, date: date}
         );
 
         // Save the task
